@@ -1,0 +1,97 @@
+\documentclass[a4paper,12pt]{report}
+
+% ------------------------
+% Pacchetti di base
+% ------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{margin=3cm}
+\usepackage{setspace}
+\onehalfspacing % interlinea 1.5
+
+% ------------------------
+% Inizio documento
+% ------------------------
+\begin{document}
+
+% ------------------------
+% Frontespizio
+% ------------------------
+\begin{titlepage}
+    \centering
+    
+    % Logo in alto
+    \includegraphics[width=6cm]{tesi/logo_uniroma3.jpeg}\par\vspace{0.5cm}
+    
+    {\large UNIVERSITÀ DEGLI STUDI ROMA TRE}\par
+    \vspace{0.2cm}
+    {\normalsize Dipartimento di Ingegneria Civile, Informatica e delle Tecnologie Aeronautiche}\par
+    {\normalsize Corso di Laurea Triennale in Ingegneria Informatica}\par
+    \vspace{1.5cm}
+    
+    {\large \textbf{Tesi di Laurea Triennale}}\par
+    \vspace{1.5cm}
+    
+    {\Large \textbf{Sfruttare la fragility di un timetable \\ 
+    per l'inserimento di un treno aggiuntivo \\ 
+    in caso di eventi speciali}}\par
+    \vspace{2cm}
+    
+    % Laureanda centrata
+    \begin{center}
+    \textbf{Laureanda} \\
+    Alessia Ragheb \\
+    Matricola 550427
+    \end{center}
+    
+    \vspace{1.2cm}
+    
+    % Relatrice a sinistra
+    \begin{flushleft}
+    \textbf{Relatrice} \\
+    Prof.ssa Marcella Samà
+    \end{flushleft}
+    
+    \vfill
+    
+    {\normalsize Anno Accademico 2024/2025}\par
+\end{titlepage}
+
+% ------------------------
+% Indice
+% ------------------------
+\tableofcontents
+\newpage
+
+% ------------------------
+% Capitoli (scheletro)
+% ------------------------
+
+\chapter{Introduzione}
+% Qui scrivi introduzione e contesto del problema
+
+\chapter{Stato dell'arte}
+% Qui inserisci riferimenti a Wilson, Castro, altri articoli, concetto di fragilità, timetable, ecc.
+
+\chapter{Metodologia}
+% Qui spieghi il modello, l'algoritmo, le classi del codice, come funziona la DP, ecc.
+
+\chapter{Caso di studio}
+% Qui racconti il dataset (XML, JSON), le finestre artificiali/reali, i grafici Gantt, gli scenari, ecc.
+
+\section{Prova}
+\subsection{Prova2}
+ciao
+\chapter{Risultati}
+% Qui metti i risultati numerici, fragilità trovata, esempi di percorsi ottimi, confronto scenari.
+
+\chapter{Conclusioni e sviluppi futuri}
+% Qui scrivi le conclusioni + possibili estensioni (es. cambiare timetable, scenari più complessi, ecc.)
+
+% ------------------------
+% Fine documento
+% ------------------------
+\end{document}
