@@ -1,11 +1,16 @@
-\documentclass[a4paper,12pt]{report}
+\documentclass{report}
 
 % ------------------------
-% Pacchetti di base
+% Pacchetti di base (ordine corretto)
 % ------------------------
-\usepackage[utf8]{inputenc}
+\usepackage[utf8]{inputenc}  % prima di csquotes
 \usepackage[T1]{fontenc}
+\usepackage{pdflscape}
 \usepackage[italian]{babel}
+\usepackage{csquotes}        % dopo babel e prima di biblatex
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{capt-of}
 \usepackage{graphicx}
 \usepackage{geometry}
 \geometry{margin=3cm}
@@ -13,8 +18,28 @@
 \usepackage{amsfonts}
 \usepackage{xcolor}
 \usepackage{amsmath}
-\onehalfspacing % interlinea 1.5
 
+% Hyperref va caricato PRIMA di biblatex
+\usepackage{hyperref}
+
+% ------------------------
+% Bibliografia
+% ------------------------
+\usepackage[backend=biber,style=numeric]{biblatex}
+\addbibresource{references.bib}
+
+% Stringhe localizzate
+\DefineBibliographyStrings{italian}{references = {Bibliografia}}
+
+% Comandi personalizzati (OK dopo biblatex)
+\DeclareCiteCommand{\footshorthand}
+  {\usebibmacro{prenote}}
+  {\bibhyperref{\printfield{shorthand}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+% Macro comoda: \fnShort{chiave} oppure \fnShort[pp.~10--12]{chiave}
+\newcommand{\fnShort}[2][]{\footnote{\footshorthand[#1]{#2}}}
 % ------------------------
 % Inizio documento
 % ------------------------
@@ -38,8 +63,8 @@
     {\large \textbf{Tesi di Laurea Triennale}}\par
     \vspace{1.5cm}
     
-    {\Large \textbf{Sfruttare la fragility di un timetable \\ 
-    per l'inserimento di un treno aggiuntivo \\ 
+    {\Large \textbf{Sfruttare la fragility di un timetable
+    per l'inserimento di un treno aggiuntivo 
     in caso di eventi speciali}}\par
     \vspace{2cm}
     
@@ -66,6 +91,7 @@
 % ------------------------
 % Indice
 % ------------------------
+\onehalfspacing
 \tableofcontents
 
 % ------------------------
@@ -73,9 +99,6 @@
 % ------------------------
 \chapter*{Introduzione}
 \addcontentsline{toc}{chapter}{Introduzione}
-
-% Qui scrivi l’introduzione (3–4 pagine).
-% Alla fine, quando sarà completa, fungerà da sintesi generale.
 
 % ------------------------
 % Capitolo 1
@@ -85,30 +108,40 @@
 
 \section{Evoluzione del trasporto ferroviario}
 
-Il trasporto ferroviario da sempre costituisce una delle modalità più significative per lo spostamento di persone o merci. Nei primi tempi, quando le ferrovie erano ancora un fenomeno emergente e le corse erano poche e le infrastrutture ancora limitate : la pianificazione degli orari rimaneva uno strumento flessibile e poco complesso da gestire. Bastava quindi, in casi particolari e delicati, dare priorità a tratte a lunga percorrenza o ai treni merci più rilevanti, costruendo così di conseguenza il diagramma spazio-tempo su carta, dove i treni da gestire e coordinare venivano rappresentati con linee tracciate a mano. Questa pratica artigianale, che si basava dunque sull'esperienza e sull'intuizione dei tecnici, molto presto ha mostrato di avere i suoi limiti. Limiti emersi pian piano dalla sempre più crescente necessità di soddisfare un bisogno ovvero quello di trasportare in tempi sempre più ridotti, più persone o merci, sfruttando al massimo la capacità di un'infrastruttura e gestire quelli che possono essere possibili situazioni di conflitto fra treni. \\ Questo perchè uno dei limiti che comportava proprio questa pianificazione artigianale era la difficoltà di gestire possibili conflitti, simulare scenari alternativi o valutare l’impatto effettivo di un ritardo. 
-La pianificazione degli orari non poteva più basarsi quindi sul vecchio metodo, impreciso e inaffidabile, ma iniziava a richiedere strumenti sempre più precisi in grado di garantire una buona affidabilità di tale servizio e questo per via delle nuove innovazioni: come l'estensione delle linee a doppio binario, l'elettrificazione e l'introduzione di treni ad alta velocità, che hanno dunque contribuito ad arricchire sempre di più quella che è la complessità di una rete, diventa quindi impossibile gestire il tutto manualmente. La costruzione quindi di questi timetable divenne un vero e proprio problema di ottimizzazione, tanto da sviluppare modelli matematici e algoritmi in grado di gestire situazioni complicate e aumentare la robustezza di questa pianificazione, ciò ha trasformato l'orario nel vero cuore pulsante di un sistema ferroviario.
+
+
+Il trasporto ferroviario da sempre costituisce una delle modalità più significative per lo spostamento di persone o merci. Nei primi tempi, quando le ferrovie erano ancora un fenomeno emergente e le corse erano poche e le infrastrutture ancora limitate: la pianificazione degli orari rimaneva uno strumento flessibile e poco complesso da gestire. Bastava quindi, in casi particolari e delicati, dare priorità a tratte a lunga percorrenza o ai treni merci più rilevanti, costruendo così di conseguenza il diagramma spazio-tempo su carta. Dove i treni da gestire e coordinare venivano rappresentati con linee tracciate a mano. Questa pratica artigianale, che si basava dunque sull'esperienza e sull'intuizione dei tecnici, molto presto ha mostrato di avere i suoi limiti. Limiti emersi pian piano dalla sempre più crescente necessità di soddisfare un bisogno ovvero quello di trasportare in tempi sempre più ridotti, più persone o merci, sfruttando al massimo la capacità di un'infrastruttura e gestire quelli che possono essere possibili situazioni di conflitto fra treni.  \\ Questo perchè uno dei limiti che comportava proprio questa pianificazione artigianale era la difficoltà di gestire possibili conflitti, simulare scenari alternativi o valutare l’impatto effettivo di un ritardo.  \\ In letteratura, questo passaggio viene descritto come il naturale approdo a una formalizzazione di ottimizzazione: si definisce una funzione obiettivo (ad esempio ridurre ritardi o conflitti) soggetta a vincoli operativi (headway, tempi tecnici, capacità di stazioni e tratte).\fnShort{CacchianiToth2012}.
+La pianificazione degli orari non poteva più basarsi quindi sul vecchio metodo, impreciso e inaffidabile, ma iniziava a richiedere strumenti sempre più precisi in grado di garantire una buona affidabilità di tale servizio e questo per via delle nuove innovazioni: come l'estensione delle linee a doppio binario, l'elettrificazione e l'introduzione di treni ad alta velocità, che hanno dunque contribuito ad arricchire sempre di più quella che è la complessità di una rete, diventa quindi impossibile gestire il tutto manualmente. La costruzione quindi di questi timetable divenne un vero e proprio problema di ottimizzazione, tanto da sviluppare modelli matematici e algoritmi in grado di gestire situazioni complicate e aumentare la robustezza di questa pianificazione. \\ Ciò ha trasformato l'orario nel vero cuore pulsante di un sistema ferroviario.
 Per questo motivo, le compagnie ferroviarie investono mesi nella progettazione di un timetable, esaminando attentamente alcune soluzioni per soddisfare la domanda.
 
 
 
 \subsection{Dall’artigianato all’ottimizzazione}
 L’aumento della domanda e della densità dei treni ha trasformato la pianificazione degli orari, come abbiamo già detto, in un vero e proprio problema di ottimizzazione combinatoria. A partire dagli anni Settanta si sono diffusi i primi software per disegnare i diagrammi spazio–tempo, ma la logica di base rimaneva manuale. Con l’avvento dell’informatica e della ricerca operativa, il timetabling è stato formalizzato come un problema matematico con vincoli di capacità, precedenza e sicurezza. Algoritmi di programmazione lineare intera mista (MILP), tecniche di constraint programming ed euristiche sono stati sviluppati per generare orari efficienti e compatibili con i vincoli operativi.
-Tuttavia, anche questi metodi tradizionali faticano a gestire reti sempre più congestionate: la presenza di molte variabili e vincoli rende proibitiva l’esplorazione dell’intero spazio delle soluzioni.
+Le formulazioni MILP esplicitano obiettivi e vincoli su casi periodici reali, garantendo la fattibilità oraria.\fnShort{Caprara2002}
+In parallelo, la propagazione dei ritardi è analizzata con algoritmi dedicati che supportano valutazioni di stabilità su reti estese.\fnShort{TRC2010}
+\\ Tuttavia, anche questi metodi tradizionali faticano a gestire reti sempre più congestionate: la presenza di molte variabili e vincoli rende proibitiva l’esplorazione dell’intero spazio delle soluzioni.
+
+
 
 
 
 \subsection{Digitalizzazione e intelligenza artificiale}
 Negli ultimi anni si è fatto un salto molto importante con l’adozione di strumenti basati su intelligenza artificiale (IA) e gemelli digitali. Le reti ferroviarie moderne generano enormi volumi di dati grazie a sensori distribuiti lungo l’infrastruttura e a bordo dei convogli. Algoritmi di machine learning utilizzano questi flussi per prevedere guasti e ottimizzare gli orari: un recente rapporto evidenzia che i modelli analizzano il flusso di passeggeri e i dati operativi per ridurre i ritardi e migliorare l’affidabilità.
-Nel contempo, i gemelli digitali consentono di creare copie virtuali della rete, integrando sensori IoT, IA e cloud computing. Questi modelli simulano scenari come variazioni di domanda o condizioni meteorologiche, identificando la sequenza di tracce più efficiente e valutando l’effetto di modifiche operative.
+Nel contempo, i gemelli digitali consentono di creare copie virtuali della rete. I digital twin ferroviari integrano dati IoT, simulazioni, cloud computing e AI per testare scenari e supportare decisioni in tempo reale.\fnShort{DT2025}
+ Questi modelli simulano scenari come variazioni di domanda o condizioni meteorologiche, identificando la sequenza di tracce più efficiente e valutando l’effetto di modifiche operative.
 Grazie alle simulazioni in tempo reale è possibile inserire margini di recupero mirati e prendere decisioni più veloci.
 La digitalizzazione ha trasformato l’orario da documento statico a sistema “vivo” che si aggiorna continuamente. Mentre un tempo i timetables venivano rivisti poche volte l’anno, oggi i feed in tempo reale inviano aggiornamenti ogni pochi secondi e i sistemi AI monitorano lo stato della rete per intervenire prima che un piccolo ritardo si trasformi in un effetto domino.
 I modelli predittivi hanno lo scopo di analizzare dati per suggerire interventi proattivi quali ricalcolare il percorso, ritardare un convoglio o avvisare i passeggeri di un cambio di binario.
 Queste tecnologie sostengono la necessità di nuovi paradigmi per la pianificazione, basati su previsione, prevenzione e adattamento.
 
 
+
 \subsection{Verso il quantum computing}
 Negli ultimi anni si è iniziato a parlare anche di tecnologie più avanzate del solito, come il calcolo quantistico. L’idea è che questi nuovi strumenti possano aiutare a gestire situazioni molto complicate, come la costruzione appunto degli orari ferroviari, dove ci sono tantissime variabili da considerare. In questo senso, il calcolo quantistico viene visto come una possibile evoluzione naturale dopo i metodi classici e l’intelligenza artificiale, aprendo scenari interessanti per la pianificazione ferroviaria.
 Questo approccio esplora un vasto spazio di soluzioni non raggiungibile dai metodi tradizionali, aprendo così una nuova frontiera per il timetabling.
+Questi studi mostrano la fattibilità di approcci ibridi quantistico–classici per problemi di rescheduling su reti urbane.\fnShort{QRail2024}
+
 
 
 \section{Cos’è un timetable e perché serve robusto}
@@ -116,26 +149,21 @@ Il timetable è, a tutti gli effetti, il piano che regola la circolazione ferrov
 È quindi la base organizzativa che permette di coordinare treni passeggeri o merci, garantendo che l’infrastruttura venga sfruttata al meglio delle sue possibilità e utilizzata in modo ordinato e sicuro.
 Progettare un orario al giorno d'oggi significa però considerare molti fattori rispetto a un tempo: la domanda di mobilità, i vincoli di sicurezza, la disponibilità di personale e mezzi, i lavori di manutenzione e gli imprevisti come guasti o maltempo. Da queste scelte dipendono non solo i tempi di viaggio, ma anche aspetti organizzativi più ampi, come i turni del personale o l’uso del materiale rotabile.
 Si parla di timetable robusto quando l’orario è costruito in modo da reggere a tutti gli effetti degli imprevisti. In una rete congestionata basta un piccolo ritardo per generare conseguenze a catena (i cosiddetti knock-on delays). Un orario robusto riesce ad assorbire questi ritardi primari, limitando la propagazione e mantenendo un servizio affidabile. Per questo spesso si inseriscono dei margini di recupero, detti buffer times, che permettono ai treni di rientrare più facilmente nei tempi previsti.
-In sintesi, un timetable non è solo una tabella di orari: è l’ossatura del sistema ferroviario. E renderlo robusto significa assicurare che continui a funzionare in maniera stabile ed efficiente anche quando le condizioni non sono ideali.
-
-
-
-\subsection{Perché servono orari robusti}
+In sintesi, un timetable non è solo una tabella di orari: è l’ossatura del sistema ferroviario. E renderlo robusto significa assicurare che continui a funzionare in maniera stabile ed efficiente anche quando le condizioni non sono ideali. \\
 Un orario “perfetto sulla carta” non è sufficiente se non resiste agli imprevisti della realtà. Robustezza significa che l’orario può assorbire perturbazioni come ritardi, guasti o variazioni di domanda senza generare ritardi a cascata. Un orario per essere quindi robusto deve essere in grado di gestire sia le interruzioni programmate come la manutenzione, sia quelle non programmate, come un rallentamento o un ritardo alla partenza.
-Per raggiungere questo obiettivo si introducono margini di recupero (buffer) tra i treni: più ampio è il buffer, maggiore è la perturbazione che l’orario può assorbire; tuttavia margini eccessivi riducono la capacità della rete. È quindi fondamentale trovare un compromesso tra efficienza e resilienza. \\ La robustezza viene spesso misurata in termini di disutilità totale: la somma ponderata del tempo di viaggio previsto e del ritardo medio. Orari con minore disutilità sono più robusti perché il ritardo medio che i passeggeri sperimentano risulta contenuto.
+Per raggiungere questo obiettivo si introducono margini di recupero (buffer) tra i treni: più ampio è il buffer, maggiore è la perturbazione che l’orario può assorbire; tuttavia margini eccessivi riducono la capacità della rete. In ambito ferroviario, la “capacità” di linea si valuta in pratica tramite compressione dell’orario e analisi delle blocking time sequences, secondo il metodo UIC 406.\fnShort{UIC406} Inoltre, il bilanciamento tra buffer e capacità è trattato estensivamente in termini di impatto su puntualità e sfruttamento della rete.\fnShort{Dewilde2013} \\ È quindi fondamentale trovare un compromesso tra efficienza e resilienza. 
+\\ La robustezza viene spesso misurata in termini di disutilità totale: la somma ponderata del tempo di viaggio previsto e del ritardo medio. Orari con minore disutilità sono più robusti perché il ritardo medio che i passeggeri sperimentano risulta contenuto.
 Gli studiosi suggeriscono di combinare simulazione e ottimizzazione esatta per generare orari robusti: la simulazione consente di valutare l’impatto delle perturbazioni mentre l’ottimizzazione trova la combinazione migliore di margini e sequenze.
+\\ Questo perchè la robustezza operativa si misura anche rispetto all’efficacia dei margini di recupero applicati.\footnote{\footshorthand{TRC2010}; \footshorthand{DAriano2009}}
+
 
 
 
 
 \subsection{L’impatto della digitalizzazione sulla robustezza}
 L’avvento dell’IA e dei gemelli digitali rende possibile valutare la robustezza in modo dinamico. Gli algoritmi di machine learning possono prevedere la propagazione di un ritardo attraverso la rete e suggerire modifiche in tempo reale, mentre le simulazioni basate su gemelli digitali permettono di testare diversi livelli di buffer e sequenze di tracce. 
-Inoltre, i sistemi di analisi predittiva basati su big data aiutano a individuare i punti critici dell’orario e a rafforzarli prima che si verifichi un guasto.
-La digitalizzazione, quindi, non solo migliora la pianificazione operativa ma offre anche strumenti per progettare orari più resilienti.
-La robustezza non è un concetto assoluto ma uno spettro lungo il quale si misura la fragilità di un orario. Un orario fragile è molto sensibile a perturbazioni: un piccolo ritardo può generare un effetto domino di cancellazioni o perdite di coincidenza. Viceversa, un orario robusto può tollerare una certa quantità di imprevisti senza compromettere l’intero sistema. La distinzione tra robustezza e fragilità è fondamentale per comprendere dove e come intervenire nella pianificazione.
-
-
-\subsection{Componenti della robustezza}
+Inoltre, i sistemi di analisi predittiva basati su big data aiutano a individuare i punti critici dell’orario e a rafforzarli prima che si verifichi un guasto. Poichè i modelli predittivi supportano scelte proattive su margini, priorità e ricalcoli di percorso in ottica preventiva.\fnShort{TRC2023} \\ La digitalizzazione, quindi, non solo migliora la pianificazione operativa ma offre anche strumenti per progettare orari più resilienti.
+La robustezza non è un concetto assoluto ma uno spettro lungo il quale si misura la fragilità di un orario. Un orario fragile è molto sensibile a perturbazioni: un piccolo ritardo può generare un effetto domino di cancellazioni o perdite di coincidenza. Viceversa, un orario robusto può tollerare una certa quantità di imprevisti senza compromettere l’intero sistema. La distinzione tra robustezza e fragilità è fondamentale per comprendere dove e come intervenire nella pianificazione.\\
 Quando si parla di robustezza di un timetable, non si intende una singola caratteristica, ma un insieme di elementi che concorrono a rendere l’orario sempre stabile. Le componenti principali possono essere così riassunte:
 
 \begin{enumerate}
@@ -150,7 +178,8 @@ Quando si parla di robustezza di un timetable, non si intende una singola caratt
     Un orario troppo saturo non lascia spazio a modifiche o recuperi. La robustezza dipende anche dal mantenere una certa quota di capacità non utilizzata, così da poter gestire deviazioni o inserire treni straordinari senza bloccare la circolazione.
 
     \item \textbf{Gestione dei conflitti} \\
-    La robustezza non riguarda solo il singolo treno, ma anche il modo in cui più convogli interagiscono fra loro. Ridurre le situazioni di conflitto (incroci su binario unico, precedenze troppo ravvicinate, coincidenze non realistiche) è fondamentale per evitare che un ritardo locale si propaghi a tutta la rete.
+    La robustezza non riguarda solo il singolo treno, ma anche il modo in cui più convogli interagiscono fra loro. Ridurre le situazioni di conflitto (incroci su binario unico, precedenze troppo ravvicinate, coincidenze non realistiche) è fondamentale per evitare che un ritardo locale si propaghi a tutta la rete. Una pianificazione robusta riduce gli incroci critici e gestisce dunque precedenze e coincidenze nei nodi sensibili.\fnShort{Dewilde2013}
+
 
     \item \textbf{Flessibilità operativa} \\
     Un orario robusto non deve essere “rigido”, ma deve consentire agli operatori di adattarsi. Ciò significa prevedere alternative praticabili, come instradamenti secondari, possibilità di sorpasso o soluzioni di emergenza che aiutino a contenere gli effetti domino.
@@ -162,13 +191,11 @@ Quando si parla di robustezza di un timetable, non si intende una singola caratt
 
 
 \section{Robustezza e fragilità}
-Negli studi sulla progettazione ferroviaria si parla spesso di robustezza come misura globale della qualità di un orario: un orario robusto limita il ritardo medio e la propagazione dei ritardi. Tuttavia, queste misure complessive non indicano dove l’orario è più vulnerabile. Sapere che un timetable è poco robusto non aiuta a identificare la tratta o la stazione che causa il problema, né a capire quali interventi potrebbero renderlo più resiliente. \\ Per affrontare questa carenza è stato introdotto il concetto di fragilità. \\ La fragilità è un indicatore locale che misura quanto un ritardo primario su una determinata coppia “treno–risorsa” (ad esempio, un treno che entra in una stazione o percorre una tratta) può propagarsi nel sistema. \\
-
-applico un ritardo primario unitario $\delta_{t,r} = 1$ alla coppia treno--risorsa $(t,r)$
-
-
-\[F(t,r) = \mathbb{E} \left[ \sum_{t' \in T} \Delta_{t'} \;\middle|\; \delta_{t,r} = 1 \right]\] \\ 
-
+Negli studi sulla progettazione ferroviaria si parla spesso di robustezza come misura globale della qualità di un orario: un orario robusto limita il ritardo medio e la propagazione dei ritardi. Tuttavia, queste misure complessive non indicano dove l’orario è più vulnerabile. Sapere che un timetable è poco robusto non aiuta a identificare la tratta o la stazione che causa il problema, né a capire quali interventi potrebbero renderlo più resiliente. \\ Per affrontare questa carenza è stato introdotto il concetto di fragilità. La fragilità è impiegata come indicatore locale per mappare sezioni critiche e orientare interventi mirati.\fnShort{Omega2025}
+\\ La fragilità è un indicatore locale che misura quanto un ritardo primario su una determinata coppia “treno–risorsa” (ad esempio, un treno che entra in una stazione o percorre una tratta) può propagarsi nel sistema. \\ Come mostrato nell’articolo TessitoreRailDresden2025 \fnShort{TessitoreRailDresden2025}, se introduciamo un ritardo primario unitario $\delta_{t,r}=1$ sulla coppia treno–risorsa $(t,r)$; la risposta del sistema (ritardi secondari indotti) fornisce una misura della fragilità: maggiore è la propagazione, maggiore è la criticità della risorsa o della sequenza considerata. Questo paradigma sperimentale è usato per valutare stabilità e sensibilità dell’orario misurando il ritardo indotto atteso.\fnShort{TRC2010}
+Per valutare la robustezza di un orario non basta quindi considerare se i treni sono correttamente allocati “sulla carta”: occorre stimare come il sistema reagisce quando si verificano piccoli intralci.
+Questo perchè uno scenario di ritardo primario unitario consiste nell’applicare un ritardo minimo (ad esempio 1 minuto) a una specifica coppia treno–risorsa (dove la risorsa può essere una stazione o una tratta). 
+\[F(t,r) = \mathbb{E} \left[ \sum_{t' \in T} \Delta_{t'} \;\middle|\; \delta_{t,r} = 1 \right]\]
 dove:
 \begin{itemize}
 
@@ -177,27 +204,26 @@ dove:
     \item $\Delta_{t'}$ è il ritardo accumulato dal treno $t'$ a seguito della perturbazione,
     
     \end{itemize}
-    In altre parole, indica il “costo di recupero” atteso: se un treno subisce un ritardo di un minuto in un punto specifico, quante ripercussioni avrà sull’orario? Un valore di fragilità alto significa che quel segmento è un punto debole: un piccolo ritardo potrebbe generare ritardi a catena, nonostante gli interventi dei dispatcher per riorganizzare i treni.
-    L’aspetto interessante della fragilità è la sua località: non viene calcolata sull’intero orario, ma su ogni singola coppia treno–risorsa. Questo permette di costruire una “mappa delle criticità” della rete, evidenziando le sezioni dove un ritardo è più pericoloso e quelle dove è relativamente innocuo. Una volta calcolate le fragilità di tutte le coppie, si può aggregarle per ottenere un indice complessivo di robustezza o, meglio ancora, usarle per decidere dove intervenire: \\
-
-\begin{enumerate}
-    \item \textbf{aggiungere margini di recupero nelle sezioni più fragili.}
-
-    \item \textbf{programmare la manutenzione nelle tratte più delicate.}
-
-    \item \textbf{orientare gli investimenti infrastrutturali verso le stazioni o le linee che ne hanno più bisogno.}
-    
-    \end{enumerate}
-    
-La fragilità, quindi, non sostituisce la robustezza ma la integra, offrendo uno strumento operativo che collega la teoria alla pratica quotidiana di chi gestisce e progetta gli orari.
+L’ipotesi è semplice: “se questo treno arriva o parte con un minuto di ritardo in questo punto, che cosa succede al resto dell’orario?”.
+Qui entra in gioco quella che è l'analisi sistematica: si ripete lo stesso esperimento su tutte le coppie treno–risorsa fino ad ottenere una visione completa della rete, evidenziando così “nodi fragili” e “nodi resilienti”.
+Gli scenari di ritardo primario unitario sono la base sperimentale per passare da una misura astratta di robustezza a un indice locale di fragilità. Questo approccio ci permette di trasformare un problema complesso e globale in un’informazione utilizzabile dal nostro algoritmo: scegliere, tra le varie finestre temporali disponibili, quelle con impatto minimo in caso di perturbazioni. \\ In altre parole, indica il “costo di recupero” atteso: se un treno subisce un ritardo di un minuto in un punto specifico, quante ripercussioni avrà sull’orario? Un valore di fragilità alto significa che quel segmento è un punto debole: un piccolo ritardo potrebbe generare ritardi a catena, nonostante gli interventi dei dispatcher per riorganizzare i treni.
+    L’aspetto interessante della fragilità è la sua località: non viene calcolata sull’intero orario, ma su ogni singola coppia treno–risorsa. Questo permette di costruire una “mappa delle criticità” della rete, evidenziando le sezioni dove un ritardo è più pericoloso e quelle dove è relativamente innocuo. Una volta calcolate le fragilità di tutte le coppie, si può aggregarle per ottenere un indice complessivo di robustezza o, meglio ancora, usarle per decidere dove intervenire. Aiutando quindi ad aggiungere margini di recupero nelle sezioni più fragili, programmare la manutenzione nelle tratte più delicate, orientare gli investimenti infrastrutturali verso le stazioni o le linee che ne hanno più bisogno. \\ La fragilità, quindi, non sostituisce la robustezza ma la integra, offrendo uno strumento operativo che collega la teoria alla pratica quotidiana di chi gestisce e progetta gli orari.
 
 
 
 \section{Inserimento di treni extra}
-Le compagnie ferroviarie devono molto spesso affrontare situazioni in cui è necessario inserire treni aggiuntivi. Questo accade, ad esempio, quando si svolgono eventi speciali che generano picchi di domanda, durante periodi festivi, o quando occorre organizzare convogli merci straordinari. Inserire un nuovo treno in un orario già molto fitto è una sfida: occorre trovare uno slot in cui il convoglio non interferisca con gli altri, non superi la capacità delle linee e non causi ritardi a catena.
-
-Tradizionalmente, l’inserimento di treni extra avveniva in modo euristico: si cercava un intervallo di tempo libero e, se necessario, si spostavano alcuni treni per fare spazio al nuovo convoglio. Tuttavia, questo approccio può generare conflitti e aumentare la fragilità dell’orario. Utilizzando la mappa di fragilità, invece, è possibile individuare le sezioni meno sensibili ai ritardi.
+Le compagnie ferroviarie devono molto spesso affrontare situazioni in cui è necessario inserire treni aggiuntivi. Questo accade, ad esempio, quando si svolgono eventi speciali che generano picchi di domanda, durante periodi festivi, o quando occorre organizzare convogli merci straordinari. Inserire un nuovo treno in un orario già molto fitto è una sfida: occorre trovare uno slot in cui il convoglio non interferisca con gli altri, non superi la capacità delle linee e non causi ritardi a catena. \\ Tradizionalmente, l’inserimento di treni extra avveniva in modo euristico: si cercava un intervallo di tempo libero e, se necessario, si spostavano alcuni treni per fare spazio al nuovo convoglio. \\ Tuttavia, questo approccio può generare conflitti e aumentare la fragilità dell’orario. \\ Utilizzando la mappa di fragilità, invece, è possibile individuare le sezioni meno sensibili ai ritardi.
+L’uso di indicatori locali di fragilità permette di individuare finestre a basso impatto per inserimenti straordinari mantenendo la qualità del servizio.\fnShort{Omega2025}
 Questa idea rappresenta il filo conduttore della tesi: dimostrare che la fragilità non è solo un indicatore teorico ma un vero strumento di supporto decisionale, capace di guidare l’inserimento di treni extra in un orario reale senza comprometterne la qualità.
+Come possiamo notare nella figura, che comprende treni da entrambe le direzioni e ne rappresentà la fragilità per tratto. È possibile verificare ad occhio e fare una prima analisi superficiale della situazione.
+\begin{figure}[H]  % H = Here esatto
+  \centering
+  \includegraphics[width=1.0\linewidth]{tesi/MappaFragilità1.pdf}
+  \caption{Esempio di come è fatta una mappa di fragilità.}
+  \label{fig:placeholder}
+\end{figure}
+
+
 
 % ------------------------
 % Capitolo 2
@@ -205,19 +231,15 @@ Questa idea rappresenta il filo conduttore della tesi: dimostrare che la fragili
 \chapter{Formalizzazione del problema}
 
 \section{Definizione del problema}
-Il lavoro nasce dall’esigenza pratica di inserire un treno aggiuntivo in una rete che ha già un orario definito, senza dover riprogettare l’intero timetable. L’inserimento deve essere sicuro, fattibile e “leggero”: niente conflitti, rispetto dei vincoli (headway, capacità di stazioni e tratte, tempi tecnici di percorrenza), minimo impatto sui treni esistenti e basso rischio di generare ritardi a catena. In altre parole: trovare quando e dove il treno può passare, con orari concreti, e con quale livello di rischio per la stabilità dell’orario.
-
-
-\subsection{Perché è considerato a tutti gli effetti un problema?}
+Il lavoro nasce dall’esigenza pratica di inserire un treno aggiuntivo in una rete che ha già un orario definito, senza dover riprogettare l’intero timetable. L’inserimento deve essere sicuro, fattibile e “leggero”: niente conflitti, rispetto dei vincoli (headway, capacità di stazioni e tratte, tempi tecnici di percorrenza), minimo impatto sui treni esistenti e basso rischio di generare ritardi a catena.
+ In altre parole: trovare quando e dove il treno può passare, con orari concreti, e con quale livello di rischio per la stabilità dell’orario.\\ \textbf{Perché è considerato a tutti gli effetti un problema?} \\
 Non è “solo” aggiungere un treno.
-L’orario reale molto spesso è già saturo: singoli binari unici, incroci delicati, stazioni con capienza limitata, coincidenze da proteggere, finestre di manutenzione. Ogni treno in più interagisce con quelli già presenti: anticipi/ritardi locali possono spostare precedenze e creare punti di conflitto. Inoltre i piccoli scostamenti non sono indipendenti: un ritardo primario su un passaggio “sensibile” può propagarsi e coinvolgere molti convogli. Per questo l’inserimento “alla cieca” è rischioso.
-
-
-
-\subsection{Perché va risolto?}
-La domanda può cambiare: eventi speciali, picchi stagionali, merci urgenti. Poter accogliere capacità aggiuntiva senza compromettere l’orario di base è un vantaggio operativo e di servizio. Un metodo che identifica gli slot giusti (finestre temporali) e misura il rischio locale permette di sfruttare la rete in modo mirato, mantenendo affidabilità e qualità percepita dai passeggeri.
+L’orario reale molto spesso è già saturo: singoli binari unici, incroci delicati, stazioni con capienza limitata, coincidenze da proteggere, finestre di manutenzione. Ogni treno in più interagisce con quelli già presenti: anticipi/ritardi locali possono spostare precedenze e creare punti di conflitto. Inoltre i piccoli scostamenti non sono indipendenti: un ritardo primario su un passaggio “sensibile” può propagarsi e coinvolgere molti convogli. Per questo l’inserimento “alla cieca” è rischioso. \\ 
+\textbf{Perché va risolto?} \\ La domanda può cambiare: eventi speciali, picchi stagionali, merci urgenti. Poter accogliere capacità aggiuntiva senza compromettere l’orario di base è un vantaggio operativo e di servizio. Un metodo che identifica gli slot giusti (finestre temporali) e misura il rischio locale permette di sfruttare la rete in modo mirato, mantenendo affidabilità e qualità percepita dai passeggeri.
 Lo spazio delle soluzioni è combinatorio: ogni scelta di orario per il treno aggiuntivo influenza più risorse (stazioni, tratte) e più treni, con vincoli che cambiano per direzione, tipo di linea (binario unico/doppio) e capacità locale. Inoltre la rete non è omogenea: esistono “colli di bottiglia” dove un minuto vale più che altrove. Servono quindi criteri locali per capire dove l’orario “cede” più facilmente.
-Un inserimento mal posizionato si paga in puntualità, affidabilità e costi operativi.
+Un inserimento mal posizionato si paga in puntualità, affidabilità e costi operativi. \\ Indicando con $R$ l’insieme delle risorse (tratte/stazioni) e con $W_r$ le finestre disponibili sulla risorsa $r\in R$, l’inserimento di un treno extra $x$ si traduce nella scelta di una sequenza $\{w_r\in W_r\}_{r\in \text{percorso}(x)}$ tale che: (i) coerenza temporale $\text{start}(w_{r+1}) \ge \text{end}(w_r)+\text{travel}(r,r{+}1)$; (ii) rispetto dell’\emph{headway} con i treni esistenti; (iii) compatibilità di \emph{interlocking}/itinerari; (iv) attesa massima tra finestre consecutive $\le \Delta_{\max}$. Un criterio naturale è minimizzare il \emph{rischio locale} (fragilità) associato alle finestre scelte, ad esempio $\min \sum_{r} \text{frag}(w_r)$, in modo da privilegiare slot che riducano la propagazione attesa del ritardo.\fnShort{CacchianiToth2012} \\ Le ipotesi su tempi tecnici (clearance, rilascio dei blocchi, occupazione itinerari) e regole di sicurezza discendono dai glossari ERA e dai testi di segnalamento: in particolare l’\emph{headway} è funzione della protezione dei segnali e dei tempi di frenatura, mentre l’uso di \emph{blocking time sequences} consente di collegare le scelte di orario al consumo di capacità effettivo.\footnote{\footshorthand{ERA-Terminologia}; \footshorthand{Pachl2016}; \footshorthand{UIC406}}
+
+
 
 
 \subsection{Colli di bottiglia della rete}
@@ -225,29 +247,13 @@ Un aspetto fondamentale da considerare è che la rete ferroviaria, come abbiamo 
 Sono stazioni che hanno la funzione di delimitare i cosiddetti blocchi di circolazione.
 Le Block Points hanno un ruolo cruciale perché spesso si trovano in corrispondenza di tratte a binario unico, dove due treni non possono circolare contemporaneamente nello stesso segmento. \\ In questi casi, anche un ritardo minimo può bloccare l’accesso all’intera sezione, propagandosi su più convogli.
 Il loro scopo principale è quindi garantire la sicurezza della marcia dei treni e regolare il flusso nelle tratte più critiche, in queste casi, le Block Points fungono da punto di attesa o instradamento.\\
-Per questo motivo, nel metodo proposto, le Block Points vengono trattate con regole più severe: l’inserimento di un treno aggiuntivo in corrispondenza di tali stazioni è vincolato a margini di sicurezza maggiori e a controlli più stringenti sulla compatibilità temporale.
+Per questo motivo, nel metodo proposto, le Block Points vengono trattate con regole più severe: l’inserimento di un treno aggiuntivo in corrispondenza di tali stazioni è vincolato a margini di sicurezza maggiori e a controlli più stringenti sulla compatibilità temporale. La classificazione dei nodi come \emph{colli di bottiglia} è coerente con approcci di pianificazione stazionale robusta, che bilanciano capacità, routing e precedenze.\fnShort{Dewilde2013}
+
+\textbf{Cosa rende il problema dunque difficile?} \\
+La perdita di robustezza dell’orario (ciò implica che se si sbaglia quel tratto diventa più vulnerabile per tutta la giornata e quindi non più toccabile), oltre a ritardi a cascata su tratte già dense, rottura di coincidenze e riorganizzazioni operative (sorpassi non previsti) e conflitti di traccia.
 
 
-\subsection{Cosa rende il problema difficile?}
-\begin{itemize}
-\item conflitti di traccia o di stazione (violazioni di headway/capacità);
 
-\item ritardi a cascata su tratte già dense;
-
-\item rottura di coincidenze e riorganizzazioni operative (sorpassi non previsti, resequencing forzato);
-
-\item soppressioni parziali o riduzione dell’offerta nelle ore successive;
-
-\item perdita di robustezza dell’orario (quel tratto diventa più vulnerabile per tutta la giornata).
-\end{itemize}
-
-
-\section{Scenario di ritardo primario (unitario)}
-Per valutare la robustezza di un orario non basta considerare se i treni sono correttamente allocati “sulla carta”: occorre stimare come il sistema reagisce quando si verificano piccoli intralci. Un approccio molto diffuso è quello degli scenari di ritardo primario, in cui si introduce artificialmente un ritardo elementare su una risorsa e si osserva come esso si propaga.
-Uno scenario di ritardo primario unitario consiste nell’applicare un ritardo minimo (ad esempio 1 minuto) a una specifica coppia treno–risorsa (dove la risorsa può essere una stazione o una tratta). 
-L’ipotesi è semplice: “se questo treno arriva o parte con un minuto di ritardo in questo punto, che cosa succede al resto dell’orario?”.
-Qui entra in gioco quella che è l'analisi sistematica: si ripete lo stesso esperimento su tutte le coppie treno–risorsa fino ad ottenere una visione completa della rete, evidenziando così “nodi fragili” e “nodi resilienti”.
-Gli scenari di ritardo primario unitario sono la base sperimentale per passare da una misura astratta di robustezza a un indice locale di fragilità. Questo approccio ci permette di trasformare un problema complesso e globale in un’informazione utilizzabile dal nostro algoritmo: scegliere, tra le varie finestre temporali disponibili, quelle con impatto minimo in caso di perturbazioni.
 
 
 \section{Finestre temporali e influenze}
@@ -255,73 +261,29 @@ Gli scenari di ritardo primario unitario sono la base sperimentale per passare d
 Quando si parla di inserire un treno aggiuntivo in un orario ferroviario, non si ragiona più soltanto in termini di “tracce già esistenti”, ma è necessario costruire una visione a intervalli temporali. 
 L’idea è quella di dividere l’intero orizzonte temporale della giornata (ad esempio le 24 ore di esercizio) in finestre, cioè segmenti di tempo che rappresentano le opportunità reali o potenziali per collocare un nuovo treno. 
 Una finestra temporale è dunque un intervallo di tempo caratterizzato dall'intervallo (start,end) durante il quale una determinata risorsa della rete (una stazione o una tratta) risulta disponibile, ossia non occupata da altri convogli. Ogni finestra può quindi essere vista come uno slot libero in cui inserire un treno senza violare i vincoli immediati di capacità.
-
-Nel nostro modello, a ciascuna finestra vengono aggiunte ulteriori informazioni:
-
-\begin{itemize}
- \item start: istante di inizio della disponibilità;
-
-
- \item end: istante di fine della disponibilità;
-
- \item fragilità: misura della fragilità associata a quell’intervallo, che rappresenta quanto un eventuale ritardo o modifica introdotto in quella finestra rischi di propagarsi;
-
- \item centro: il baricentro temporale dell’intervallo, utile per confrontare la coerenza tra finestre consecutive;
-
- \item tipo: caratterizzato a sua volta da due tipi : \\
-  Reale: slot temporale con il quale indichiamo effettivamente la presenza di un treno. \\
-  Artificiale: slot temporale costruito invece nei gap liberi tra due treni consecutivi per rendere esplicita la disponibilità in quel tratto.
-
-\end{itemize} 
-In questo senso, lo slot temporale non è soltanto un “vuoto” nel calendario, ma un intervallo caratterizzato da qualità (fragilità più o meno alta, maggiore o minore tolleranza agli imprevisti).
+\\ Nel nostro modello, a ciascuna finestra vengono aggiunte ulteriori informazioni:
+ start: istante di inizio della disponibilità, end: istante di fine della disponibilità, fragilità: misura della fragilità associata a quell’intervallo, che rappresenta quanto un eventuale ritardo o modifica introdotto in quella finestra rischi di propagarsi, centro: il baricentro temporale dell’intervallo, utile per confrontare la coerenza tra finestre consecutive, tipo: caratterizzato a sua volta da due tipi : \\
+  reale: slot temporale con il quale indichiamo effettivamente la presenza di un treno. \\
+  artificiale: slot temporale costruito invece nei gap liberi tra due treni consecutivi per rendere esplicita la disponibilità in quel tratto. \\  In questo senso, lo slot temporale non è soltanto un “vuoto” nel calendario, ma un intervallo caratterizzato da qualità (fragilità più o meno alta, maggiore o minore tolleranza agli imprevisti).
 L’orizzonte temporale della rete viene dunque suddiviso in un insieme ordinato di finestre. 
 Questa suddivisione avviene in due modi, finestre reali e finestre artificiali.
 Il risultato è una griglia di slot che copre l’intera giornata, con lunghezze variabili e fragilità associate.
 
 
 
-\subsection{Influenze e incastri}
+\subsection{Compatibilità}
 
-Due finestre consecutive sono compatibili se:
+Due finestre consecutive sono compatibili se: rispettano la continuità temporale; hanno un centro temporale coerente (il centro della seconda è successivo a quello della prima); rispettano i vincoli di headway, direzione e capacità; non cadono in conflitto in punti sensibili come le Block Points. \\ Le finestre temporali sono gli “slot” potenzialmente utilizzabili. \\ La divisione dell’orizzonte temporale in finestre consente di descrivere la disponibilità di risorse durante l'arco di tutta la giornata. \\ 
+Tuttavia, le finestre non possono essere considerate in isolamento. È la loro sequenza coerente a determinare la possibilità effettiva di inserire un nuovo servizio. \\ Per questo motivo introduciamo il concetto di influenza: ogni finestra condiziona la successiva, nel senso che ne restringe o amplia la fattibilità. Questo legame è ciò che consente di costruire un percorso fluido lungo più stazioni. \\ Le influenze tra finestre determinano dunque quali sequenze sono effettivamente percorribili, e quindi quale percorso ottimale è costruibile per il treno aggiuntivo. \\ \ Se per esempio, rappresentassimo ogni finestra come un nodo di un grafo orientato, possiamo dire che, esiste un arco tra due finestre successive se: (i) l’ordine temporale è crescente; (ii) l’attesa non supera $\Delta_{\max}$; (iii) non si violano headway e interlocking. Un \emph{cammino} da origine a destinazione rappresenta un percorso praticabile; pesando nodi/archi con la fragilità si ottiene un problema di cammino minimo con cui anticipare conflitti e limitare la propagazione dei ritardi già in fase di inserimento.\fnShort{DAriano2009}
 
-\begin{itemize}
-    \item rispettano la continuità temporale;
-
-
-    \item hanno un centro temporale coerente (il centro della seconda è successivo a quello della prima);
-
-    \item rispettano i vincoli di headway, direzione e capacità;
-
-     \item non cadono in conflitto in punti sensibili come le Block Points.
-
-  \end{itemize}
-Le finestre temporali sono gli “slot” potenzialmente utilizzabili. \\ La divisione dell’orizzonte temporale in finestre consente di descrivere la disponibilità di risorse durante l'arco di tutta la giornata. \\ 
-Tuttavia, le finestre non possono essere considerate in isolamento. È la loro sequenza coerente a determinare la possibilità effettiva di inserire un nuovo servizio. \\ Per questo motivo introduciamo il concetto di influenza: ogni finestra condiziona la successiva, nel senso che ne restringe o amplia la fattibilità. Questo legame è ciò che consente di costruire un percorso fluido lungo più stazioni. \\ Le influenze tra finestre determinano dunque quali sequenze sono effettivamente percorribili, e quindi quale percorso ottimale è costruibile per il treno aggiuntivo.
 
 
 \section{Metodo proposto}
 Per affrontare il problema dell’inserimento di un treno aggiuntivo in un orario già esistente, ho deciso di sfruttare il concetto di fragilità come guida principale. \\ In questo modo, non solo individuiamo le finestre temporali disponibili, ma le valutiamo in base alla loro capacità di assorbire perturbazioni senza generare ritardi a catena.
 Le finestre rappresentano la materia prima su cui l’algoritmo lavora. \\ Inserire un treno significa scegliere una sequenza di finestre compatibili tra loro (una per ogni risorsa del percorso) e incastrarle in modo fluido.
 In pratica, il procedimento consiste nel calcolare la fragilità per ogni tratto, selezionare le sezioni con valori più bassi e verificare se un nuovo treno può essere inserito in quelle finestre senza creare conflitti. Questa idea rappresenta il filo conduttore della tesi: dimostrare che la fragilità non è solo un indicatore teorico ma un vero strumento di supporto decisionale, capace di guidare l’inserimento di treni extra in un orario reale senza comprometterne la qualità.
- Utilizzando la mappa di fragilità, è possibile individuare le sezioni meno sensibili ai ritardi: queste “finestre a bassa fragilità” sono gli slot ideali per inserire un treno aggiuntivo con il minimo impatto. 
-
- 
- \subsection{Fattori aggiuntivi per la robustezza}
-Oltre ai vincoli strettamente tecnici, il metodo proposto ha richiesto l’integrazione di altri elementi che servono a rafforzare la robustezza del percorso individuato:
-\begin{itemize}
-    \item Gestione delle sovrapposizioni: è stato necessario definire quanto due finestre potessero sovrapporsi, distinguendo tra casi tollerabili e casi da scartare.
-
-   \item Compatibilità temporale: introdurre controlli sulla progressione del “centro” delle finestre, per assicurare che il percorso sia sempre crescente nel tempo.
-
-  \item Capacità residua: valutare che l’inserimento non saturi completamente l’infrastruttura, lasciando comunque margini per eventuali recuperi o inserimenti futuri.
-
-  \item Classificazione della fragilità: distinguere le finestre in fasce (ottime, buone, moderate, pericolose, critiche) per avere un quadro più dettagliato delle opportunità.
-
-  \item Influenza tra treni: considerare le interazioni tra convogli, così che l’inserimento di uno non generi effetti negativi su altri già programmati.
-  \end{itemize}
-Questi accorgimenti hanno permesso di rendere il metodo più flessibile e aderente alla realtà, garantendo che la soluzione proposta non fosse solo valida “sulla carta”, ma che potrebbe essere applicabile anche in una rete reale.
-
-\subsection{Vincoli e controlli necessari}
+ Utilizzando la mappa di fragilità, è possibile individuare le sezioni meno sensibili ai ritardi: queste “finestre a bassa fragilità” sono gli slot ideali per inserire un treno aggiuntivo con il minimo impatto.  \\ \textbf{Fattori aggiuntivi per la robustezza:}\\
+Oltre ai vincoli strettamente tecnici, il metodo proposto ha richiesto l’integrazione di altri elementi che servono a rafforzare la robustezza del percorso individuato, come: \\ la gestione delle sovrapposizioni: è stato necessario definire quanto due finestre potessero sovrapporsi, distinguendo tra casi tollerabili e casi da scartare; \\ compatibilità temporale: introdurre quindi controlli sulla progressione del “centro” delle finestre, per assicurare che il percorso sia sempre crescente nel tempo;\\ capacità residua: valutare che l’inserimento non saturi completamente l’infrastruttura, lasciando comunque margini per eventuali recuperi o inserimenti futuri; \\ classificazione della fragilità: distinguere le finestre in fasce (ottime, buone, moderate, pericolose, critiche) per avere un quadro più dettagliato delle opportunità;\\ influenza tra treni: considerare le interazioni tra convogli, così che l’inserimento di uno non generi effetti negativi su altri già programmati;  \\ questi accorgimenti hanno permesso di rendere il metodo più flessibile e aderente alla realtà, garantendo che la soluzione proposta non fosse solo valida “sulla carta”, ma che potrebbe essere applicabile anche in una rete reale. \\
 Per poter trasformare la teoria in un metodo applicabile, non è bastato ragionare in termini di fragilità e finestre. È stato necessario introdurre una serie di vincoli operativi e controlli aggiuntivi che riflettono le reali condizioni di una rete ferroviaria:
 \begin{itemize}
 
@@ -354,86 +316,97 @@ Per comprendere meglio l’intero funzionamento dell'algoritmo, andremo a descri
 
 \subsection{Caricamento e preparazione dei dati}
 
-Il primo passo consiste nell’acquisizione delle informazioni necessarie, ovvero:
-
-\begin{itemize}
-    \item L’orario nominale, che rappresenta la programmazione di base già esistente. \\ Nel codice, la lettura dell’orario avviene tramite la funzione \textit{parse\_timetable()} che trasforma il file XML in un DataFrame con tutte le informazioni riguardanti i vari treni : ID, stazioni, tempi di arrivo e partenza; 
+Il primo passo consiste nell’acquisizione delle informazioni necessarie, ovvero: l’orario nominale, che rappresenta la programmazione di base già esistente. \\ Nel codice, la lettura dell’orario avviene tramite la funzione \textit{parse\_timetable()} che trasforma il file XML in un DataFrame con tutte le informazioni riguardanti i vari treni : ID, stazioni, tempi di arrivo e partenza; e i valori di fragilità, ricavati da simulazioni di scenari di ritardo primario, vengono importati e associati alle coppie treno–stazione.\\ Questi due insiemi di dati, uno di natura più “statica” e l’altro derivato da analisi dinamiche, costituiscono il punto di partenza per ogni elaborazione successiva. Senza una corretta fase di input, il modello non sarebbe in grado di valutare in maniera realistica le possibili soluzioni. \\ Questa inizializzazione ci consente di avere a disposizione due strutture dati fondamentali,ovvero: il df che contiene la programmazione nominale dei treni ed expected, che non è nient'altro che una mappa che associa a ciascuna coppia treno–stazione un valore di fragilità.
     
-    \item I valori di fragilità, ricavati da simulazioni di scenari di ritardo primario, vengono importati e associati alle coppie treno–stazione.
-\end{itemize}
-Questi due insiemi di dati, uno di natura più “statica” e l’altro derivato da analisi dinamiche, costituiscono il punto di partenza per ogni elaborazione successiva. Senza una corretta fase di input, il modello non sarebbe in grado di valutare in maniera realistica le possibili soluzioni. \\ Questa inizializzazione ci consente di avere a disposizione due strutture dati fondamentali:
-\begin{itemize}
-    \item df: che contiene la programmazione nominale dei treni;
-    
-    \item expected: mappa che associa a ciascuna coppia treno–stazione un valore di fragilità.
-    
-\end{itemize}
-
 \subsection{Generazione delle finestre temporali}
-Una volta raccolti i dati, l’algoritmo costruisce le finestre temporali, ossia gli intervalli in cui può essere inserito un treno aggiuntivo.
-Le finestre vengono prodotte dalla funzione dedicata, ovvero : 
-\textit{(genera\_finestre\_artificiali\_massive())} che ha dunque il compito di generare le nostre finestre artificiali create automaticamente nei vuoti temporali tra un treno e l’altro a prescindere dalla marcia. \\ Ogni finestra è memorizzata come tupla estesa: (start, end, frag, centro, tipo). \\ Per poter gestire quelle che sono le disomogeneità nella rete, oltre a quelle elencate precedentemente, la rete inoltre può essere  single track o double track e necessita quindi di essere gestita di conseguenza. \\ Una rete single track è una linea ferroviaria in cui un solo binario viene utilizzato da tutti i treni, indipendentemente dal senso di marcia.
-Di conseguenza, i convogli che procedono in direzioni opposte devono alternarsi, aspettando nelle stazioni o nei posti di precedenza.  \\ Questo comporta:
-
-
-\begin{itemize}
-    \item Capacità ridotta → pochi treni l’ora per direzione.
-
-
-    \item Alta vulnerabilità ai ritardi → un piccolo ritardo su un treno può propagarsi facilmente su gli altri, perché non c’è un binario alternativo su cui farlo scorrere. \\ 
-    \end{itemize}
-    Una rete double track invece è una linea in cui esistono due binari paralleli, di norma uno per ciascuna direzione di marcia. \\    Questo comporta:
-
-\begin{itemize}
-    \item Maggior capacità → possono circolare contemporaneamente più treni in entrambe le direzioni.
-    
-    \item Minore propagazione dei ritardi → perché i treni non devono attendere l’incrocio sullo stesso binario.
-\end{itemize}
-Dunque per generare finestre artificiali nella rete single track è stato necessario dichiarare una funzione aggiuntiva : \textit{genera\_finestre\_artificiali\_singletrack()} che segue una logica diversa rispetto alla funzione descritta precedentemente che invece viene utilizzata per creare finestre artificiali nella rete double track. \\ Questo perchè gli slot effettivamente liberi sono diversi fra le due reti.
- Nel percorso single track una determinata tratta si considera già occupata dal momento in cui il treno parte dalla sua stazione corrente per raggiungere la stazione successiva, dunque durante quel lasso di tempo non è possibile costruire finestre artificiali a prescindere dal senso di marcia. Differenza fondamentale con le finestre artificiali che si individuano in un percorso double track, poichè esse vengono invece generate indipendentemente dal senso di marcia, ovvero considerando solamente il proprio.
-
-\subsection{Verifica di compatibilità e influenze}
-
-Dopo la generazione delle finestre, l’algoritmo deve verificare quali finestre successive possono poi effettivamente concatenarsi fra loro e creare un percorso coerente.
-Questa logica è implementata nel metodo \textit{compatibili()}, che nel codice controlla soltanto due condizioni fondamentali:
-
-\begin{itemize}
-    \item Ordine temporale: la finestra successiva deve collocarsi più avanti nel tempo rispetto a quella precedente. L'algoritmo confronta il baricentro delle due finestre (\textit{centro\_c > centro\_p)}. Se il centro della seconda finestra non è maggiore, la concatenazione viene scartata.
-   
-    \item Distanza massima ammessa: l’inizio della finestra successiva non deve distare troppo dalla fine di quella precedente. Questo limite è regolato dal parametro \textit{delta\_max}, che fissa l’attesa massima consentita fra due finestre.
-\end{itemize}
-Grazie a questi due vincoli molto compatti, l’algoritmo riesce a garantire sia la coerenza temporale del percorso, sia la fluidità della sequenza di finestre, evitando buchi troppo ampi che renderebbero irrealistico l’inserimento del treno.
-
-
-\subsection{Scelta del percorso ottimo}
-Una volta che la concatenazione è stata considerata valida, l’algoritmo passa alla ricerca del percorso ottimale.
-In generale con il termine percorso si intende la sequenza ordinata di finestre temporali che, rispettando i vincoli di coerenza temporale, collega la stazione di origine a quella di destinazione.
-Un percorso è definito invece \textit{ottimale} quando riesce a soddisfare oltre i vincoli, la minimizzazione della fragilità totale.
-Per raggiungere questo obiettivo il codice implementa un metodo basato sulla programmazione dinamica : \textit{trova\_percorso\_ottimo()}. \\
-Questo meccanismo permette di costruire più candidati e confrontarli tra loro, mantenendo progressivamente il migliore. Il risultato non è una singola finestra “vuota”, ma un cammino coerente che attraversa tutte le stazioni richieste e che rappresenta la soluzione più equilibrata tra tempi e robustezza.
-Il concetto di percorso ottimale è quindi strettamente collegato all’idea di robustezza dell’orario: non basta sapere dove ci sia spazio per un treno, ma bisogna capire quanto sicuro sia quell’inserimento. La ricerca ottimale serve a garantire che il nuovo treno non solo entri nell’orario, ma lo faccia riducendo al minimo il rischio di innescare conflitti o ritardi a catena.
-
-\subsection{Output e visualizzazione}
-Al termine del processo di ottimizzazione, l’algoritmo non restituisce soltanto un valore astratto, ma produce un insieme strutturato di risultati che permettono di comprendere sia la soluzione trovata sia la sua qualità. \\ Gli output numerici comprendono:
-
-\begin{itemize}
-    \item La lista delle finestre selezionate: una sequenza ordinata di intervalli che costituisce il percorso scelto per il treno aggiuntivo;
-    
-    \item La fragilità totale del percorso: calcolata come somma delle fragilità delle singole finestre attraversate;
-
-    \item La stampa di scheduling: che riporta in formato tabellare le informazioni essenziali del percorso: stazione per stazione vengono mostrati gli orari di arrivo e partenza calcolati, così da evidenziare la traccia oraria effettiva del treno aggiuntivo. Questa stampa rende immediatamente chiaro non solo “dove” il treno può passare, ma anche “quando”, trasformando l’output in una forma più vicina a un orario reale;
-    \end{itemize}
-    Accanto ai valori numerici, un ruolo centrale è svolto anche dalla visualizzazione grafica. L’algoritmo include infatti un modulo di disegno \textit{(genera\_Gantt())} che genera un diagramma di Gantt.
-    Questo strumento ci permette di interpretare e valutare in maniera immediata la coerenza dei risultati ottenuti.
-    Ci permette inoltre di visualizzare tutte le finestre temporali disponibili, sia reali che artificiali contemporaneamente e distinguere le finestre in base al livello di fragilità, tramite colore. \\ Evidenziando il percorso ottimale anch'esso con un colore, ci permette così di riconoscerlo a colpo d’occhio all’interno del diagramma.
-
-\begin{figure}
+Per poter gestire quelle che sono le disomogeneità nella rete, oltre a quelle elencate precedentemente, quest'ultima può inoltre essere una rete single track o una rete double track e necessita di essere gestita di conseguenza.
+Una rete single track è una linea ferroviaria in cui un solo binario viene utilizzato da tutti i treni,
+indipendentemente dal senso di marcia. Di conseguenza, i convogli che procedono in direzioni opposte
+devono alternarsi, aspettando nelle stazioni o nei posti di precedenza.\\ Questo comporta ad avere una capacità quindi ridotta (pochi treni l'ora per direzione) e un'alta vulnerabilità ai ritardi (un piccolo ritardo su un treno può propagarsi facilmente su gli altri, perché non
+c'è un binario alternativo su cui farlo scorrere).
+Una rete double track invece è una linea in cui esistono due binari paralleli, di norma uno per ciascuna
+direzione di marcia.
+Questo comporta invece ad avere una maggiore capacità (possono circolare contemporaneamente più
+treni in entrambe le direzioni) e una minore propagazione dei ritardi (perché i treni non devono attendere
+l'incrocio sullo stesso binario). \\
+Una volta raccolto ed elaborato i dati in input, l'algoritmo costruisce le finestre temporali, ossia gli intervalli in cui può essere inserito o meno un treno aggiuntivo.
+Questo perchè accanto alla costruzione delle finestre artificiali, l’algoritmo ricava anche le finestre reali, ovvero gli intervalli occupati dai treni effettivi nel timetable. Queste vengono individuate attraverso il calcolo dei tempi di percorrenza tra le stazioni e tramite il DataFrame (df) che raccoglie l’orario pianificato. I dati così estratti vengono organizzati in un dizionario di finestre\_reali\_per stazione, che costituisce la base per il confronto con le finestre artificiali e per la successiva analisi di compatibilità. \\
+Per rendere più intuitivo il concetto di finestre reali, ovvero gli intervalli temporali “estratti” dall’orario nominale, nella figura è riportato un esempio relativo a una rete double track con alcuni treni in salita. 
+\begin{figure}[H]
     \centering
-    \includegraphics[width=1.2\linewidth]{Legenda3.png}
-    \caption{Gantt dimostrativo}
+    \includegraphics[width=1.0\linewidth]{tesi/FinestreReali3.pdf}
+    \caption{Finestre di tipo reale in una rete double track.}
+    \label{fig:placeholder}
+\end{figure} 
+
+
+ Il grafico mostra in rosso come la funzione identifichi i periodi di occupazione per ciascuna stazione, a partire dai dati presenti nel timetable. In altre parole, costruisce gli intervalli dove non è assolutamente possibile inserire un treno. \\
+Per quanto riguarda le finestre artificiali, sempre per le tratte double track, esse vengono prodotte e gestite dalla funzione: 
+\textit{(genera\_finestre\_artificiali\_massive())} che ha dunque il compito, una volta acquisito il dizionario delle finestre reali, di generare di conseguenza le finestre artificiali intorno alle occupazioni, creando finestre in cui effettivamente è possibile inserire un treno, poichè rappresentano a tutti gli effetti dei gap temporali vuoti. Anche qui prendendo in considerazione solamente il proprio senso di marcia. 
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{tesi/FinestreArtificiali.pdf}
+    \caption{Finestre di tipo artificiale in una rete double track.}
     \label{fig:placeholder}
 \end{figure}
 
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{tesi/FinestreRealiArtificiali.pdf}
+    \caption{Finestre reali e artificiali in una rete double track.}
+    \label{fig:placeholder}
+\end{figure}
+
+Inoltre ogni finestra è memorizzata come tupla estesa: (start, end, frag, centro, tipo). \\ Per generare finestre artificiali nella rete single track invece è stato necessario dichiarare una funzione aggiuntiva : \textit{genera\_finestre\_artificiali\_singletrack()} che segue una logica diversa rispetto alla funzione descritta e mostrata precedentemente. \\ Questo perchè gli slot effettivamente liberi sono diversi fra le due reti.
+ Nel percorso single track una determinata tratta si considera già occupata dal momento in cui il treno parte dalla sua stazione corrente per raggiungere la stazione successiva, dunque durante quel lasso di tempo non è possibile costruire finestre artificiali a prescindere dal senso di marcia,tiene dunque conto anche dei treni che transitano nella direzione opposta. Differenza fondamentale con le finestre artificiali che si individuano in un percorso double track.
+
+
+
+\subsection{Verifica di compatibilità}
+
+Dopo la generazione delle finestre, l’algoritmo deve verificare quali finestre successive possono poi effettivamente concatenarsi fra loro e creare un percorso coerente.
+Questa logica è implementata nel metodo \textit{compatibili()}, che nel codice controlla soltanto due condizioni fondamentali: l'ordine temporale, ovvero la finestra successiva deve collocarsi più avanti nel tempo rispetto a quella precedente. L'algoritmo confronta il baricentro delle due finestre (\textit{centro\_c > centro\_p)}. Se il centro della seconda finestra non è maggiore, la concatenazione viene scartata. \\ L'altra condizione è che la distanza massima ammessa, ovvero l’inizio della finestra successiva non deve distare troppo dalla fine di quella precedente. Questo limite è regolato dal parametro \textit{delta\_max}, che fissa l’attesa massima consentita fra due finestre. \\ Grazie a questi due vincoli molto compatti, l’algoritmo riesce a garantire sia la coerenza temporale del percorso, sia la fluidità della sequenza di finestre, evitando buchi troppo ampi che renderebbero irrealistico l’inserimento del treno.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.2\linewidth]{tesi/Compatibilità.pdf}
+    \caption{Compatibilità fra finestre artificiali al fine di creare una concatenazione coerente.}
+    \label{fig:placeholder}
+\end{figure}
+
+
+\subsection{Generazione dei possibili percorsi}
+Una volta che la concatenazione è stata considerata valida, l’algoritmo passa alla ricerca del percorso ottimale. Come evidenziato da Caprara(2002)\fnShort{Caprara2002}, la ricerca di un percorso ottimale nei problemi ferroviari richiede un equilibrio tra il rispetto dei vincoli operativi e la minimizzazione di una funzione obiettivo.
+In generale con il termine percorso si intende la sequenza ordinata di finestre temporali che, rispettando i vincoli di coerenza temporale, collega la stazione di origine a quella di destinazione.
+Un percorso è definito invece \textit{ottimale} quando riesce a soddisfare oltre i vincoli imposti, la minimizzazione della fragilità totale, che in questo caso corrisponde alla nostra funzione obiettivo.
+Per raggiungere questo obiettivo il codice implementa un metodo basato sulla programmazione dinamica : \textit{trova\_percorso\_ottimo()}. \\
+Questo meccanismo permette di costruire più candidati e confrontarli tra loro, mantenendo progressivamente il migliore. Il risultato non è una singola finestra “vuota”, ma un cammino coerente che attraversa tutte le stazioni richieste e che rappresenta la soluzione più equilibrata tra tempi e robustezza.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.2\linewidth]{tesi/ConcatenazioneFraFinestre2.pdf}
+    \caption{Possibili percorsi individuati dall'algoritmo per l'inserimento del treno.}
+    \label{fig:placeholder}
+\end{figure}
+
+Il concetto di percorso ottimale è quindi strettamente collegato all’idea di robustezza dell’orario: non basta sapere dove ci sia spazio per un treno, ma bisogna capire quanto sicuro sia quell’inserimento. La ricerca ottimale serve a garantire che il nuovo treno non solo entri nell’orario, ma lo faccia riducendo al minimo il rischio di innescare conflitti o ritardi a catena.
+
+\subsection{Output e visualizzazione}
+Al termine del processo di ottimizzazione, l’algoritmo non restituisce soltanto un valore astratto, ma produce un insieme strutturato di risultati che permettono di comprendere sia la soluzione trovata sia la sua qualità. \\ Gli output numerici comprendono: la lista delle finestre selezionate: una sequenza ordinata di intervalli che costituisce il percorso scelto per il treno aggiuntivo; la fragilità totale del percorso: calcolata come somma delle fragilità delle singole finestre attraversate; la stampa di scheduling: che riporta in formato tabellare le informazioni essenziali del percorso: stazione per stazione vengono mostrati gli orari di arrivo e partenza calcolati, così da evidenziare la traccia oraria effettiva del treno aggiuntivo. Questa stampa rende immediatamente chiaro non solo “dove” il treno può passare, ma anche “quando”, trasformando l’output in una forma più vicina a un orario reale. \\ Accanto ai valori numerici, un ruolo centrale è svolto anche dalla visualizzazione grafica. L’algoritmo include infatti un modulo di disegno \textit{(genera\_Gantt())} che genera un diagramma di Gantt.
+    Questo strumento ci permette di interpretare e valutare in maniera immediata la coerenza dei risultati ottenuti.
+    Ci permette inoltre di visualizzare tutte le finestre temporali disponibili, sia reali che artificiali contemporaneamente e distinguere le finestre in base al livello di fragilità, tramite colore. \\ Evidenziando il percorso ottimale anch'esso con un colore, ci permette così di riconoscerlo a colpo d’occhio all’interno del diagramma.
+
+    \begin{figure}[H]  % H = Here esatto
+  \centering
+  \caption{Gantt generato dall'algoritmo.}
+  \includegraphics[
+    angle=90,      % ruota di 90° in senso orario
+    origin=c,      % ruota attorno al centro
+    width=0.30\textheight, % dopo la rotazione, il lato lungo diventa l'altezza del testo
+    keepaspectratio]{tesi/Legenda3.pdf}
+  \label{fig:placeholder}
+\end{figure}
 
 
 \section{Classi e funzioni principali}
@@ -441,62 +414,41 @@ La logica complessiva si articola in tre classi principali, ciascuna responsabil
 
 \subsection{Le tre classi di percorso}
 Le tre classi \textit{PercorsoS1S8, PercorsoS8S1 e PercorsoS8S28} hanno una struttura simile: ognuna modella l’analisi del percorso ottimale in un diverso segmento della rete.
-La divisione riflette la realtà infrastrutturale: i primi due tratti (S1–S8 e S8–S1) si sviluppano su binario doppio, mentre il terzo (S8–S28) include sezioni a binario unico e quindi vincoli più stringenti.\\ Le classi condividono alcuni metodi fondamentali oltre alla struttura di base:
-
-\begin{itemize}
-    \item Ogni classe riceve come input i parametri che regolano i vincoli e la robustezza come per esempio:
-    \begin{itemize}
-    
-        \item \textit{travel\_times}: un dizionario che assegna a ogni coppia di stazioni il tempo minimo di percorrenza. Quando si verifica se due finestre possono essere concatenate, quest'ultimo viene usato come vincolo tecnico sia per stimare la coerenza dei percorsi, sia per costruire lo schedule XML finale del treno aggiuntivo. Oltre a modellare correttamente le finestre artificiali nei tratti a binario unico.
-        \item \textit{delta\_max}: soglia di tempo massima consentita tra due finestre consecutive, che rappresenta il principale vincolo temporale attivo nella compatibilità poichè nella parte double track il vincolo rappresenta il tempo medio di percorrenza fra una stazione e l'altra, mentre nella parte single track, rete quindi più satura, il vincolo permette di temporeggiare fino a una decina di minuti, aspettando così che il tratto interessato si liberi.
-    \end{itemize}
-    \end{itemize}
-    \begin{itemize}
-    \item Metodo di compatibilità \textit{compatibili()} : metodo con il quale verifichiamo se due finestre sono compatibili o meno. Fa si che per ogni tratta vengono scelte le opportune finestre, che rispettano i relativi vincoli. Scarta quindi subito le combinazioni incoerenti e lascia passare solo quelle che possono portare a un percorso temporale sensato.
-    \item Ricerca del percorso ottimale \textit{trova\_percorso\_ottimo()}: metodo che rappresenta il nucleo decisionale dell'algoritmo, poichè una volta definite le finestre compatibili per ogni stazione, l’obiettivo è costruire una sequenza che:
-        \begin{enumerate}
-            \item attraversi tutte le stazioni target nell’ordine previsto;
-            \item continui a rispettare i vincoli di compatibilità;
-            \item minimizzi la fragilità complessiva.
-        \end{enumerate}
-        a ogni passo si conserva dunque soltanto la combinazione “migliore” fino a raggiungere la combinazione invece \textit{ottima}.
-        \end{itemize}
+La divisione riflette la realtà infrastrutturale: i primi due tratti (S1–S8 e S8–S1) si sviluppano su binario doppio, mentre il terzo (S8–S28) include sezioni a binario unico e quindi vincoli più stringenti.\\ Le classi condividono alcuni metodi fondamentali oltre alla struttura di base, ovvero: ogni classe riceve come input i parametri che regolano i vincoli e la robustezza come per esempio: \textit{travel\_times}: un dizionario che assegna a ogni coppia di stazioni il tempo minimo di percorrenza. Quando si verifica se due finestre possono essere concatenate, quest'ultimo viene usato come vincolo tecnico sia per stimare la coerenza dei percorsi, sia per costruire lo schedule XML finale del treno aggiuntivo. Oltre a modellare correttamente le finestre artificiali nei tratti a binario unico. \\ Oppure \textit{{delta\_max}}: soglia di tempo massima consentita tra due finestre consecutive, che rappresenta il principale vincolo temporale attivo nella compatibilità poichè nella parte double track il vincolo rappresenta il tempo medio di percorrenza fra una stazione e l'altra, mentre nella parte single track, rete quindi più satura, il vincolo permette di temporeggiare fino a una decina di minuti, aspettando così che il tratto interessato si liberi. \\ Il metodo \textit{compatibili()} è invece il metodo con il quale verifichiamo se due finestre sono compatibili o meno. Fa si che per ogni tratta vengono scelte le opportune finestre, che rispettano i relativi vincoli. Scarta quindi subito le combinazioni incoerenti e lascia passare solo quelle che possono portare a un percorso temporale sensato.\\ Anche la ricerca del percorso ottimale \textit{trova\_percorso\_ottimo()}, quest'ultimo è un metodo che rappresenta il nucleo decisionale dell'algoritmo, poichè una volta definite le finestre compatibili per ogni stazione, l’obiettivo è costruire una sequenza che: attraversi tutte le stazioni target nell’ordine previsto, continui a rispettare i vincoli di compatibilità, minimizzi la fragilità complessiva. \\ A ogni passo si conserva dunque soltanto la combinazione “migliore” fino a raggiungere la combinazione invece \textit{ottima}.
+       
    
 
 
 \subsection{Il ruolo del file orchestratore}
-Il file "orchestratore" costituisce il cuore operativo del progetto,ha il compito di coordinare l’intero processo, dal caricamento dei dati fino alla produzione degli output finali.
-\begin{itemize}
-\item  Parsing e preprocessamento: legge i dati dall’orario nominale e dal file delle simulazioni di fragilità, trasformandoli in strutture gestibili dal programma (dataframe e dizionari). Questa fase genera i dataset di base (df, expected) necessari per tutte le elaborazioni successive.
+Il file "orchestratore" costituisce il cuore operativo del progetto,ha il compito di coordinare l’intero processo, dal caricamento dei dati fino alla produzione degli output finali. \\ Si occupa dunque del parsing e preprocessamento: legge i dati dall’orario nominale e dal file delle simulazioni di fragilità, trasformandoli in strutture gestibili dal programma (dataframe e dizionari). Questa fase genera i dataset di base (df, expected) necessari per tutte le elaborazioni successive. Per quanto riguarda invece la costruzione delle finestre: tramite i metodi descritti precedentemente, il file produce per ciascuna stazione le finestre reali e artificiali scartando inoltre finestre artificiali, anche se coerenti, troppo vicine. Gestisce la dinamica dei tratti: a seconda delle stazioni iniziali e finali assegnate in input, identifica automaticamente se si tratta di: un percorso in salita o in discesa,un tratto interno su linea sia a binario unico che a doppio binario. In base a questa classificazione dinamica, il main richiama la classe corrispondente e il relativo metodo per trovare il percorso ottimo. \\ Il file riceve dai vari moduli i percorsi parziali e si occupa di verificarne la concatenazione temporale. Nel caso di tratte miste, garantisce che la fine del primo percorso sia coerente con l’inizio del successivo. Ciò viene gestito in particolar modo dal vincolo (\textit{star\_time\_forzato}) che impone in caso la seconda tratta ad iniziare quando finisce la seconda tratta. Permettendo così di unire i percorsi considerati compatibili e validi a tutti gli effetti. \\  Cerca dunque di ottimizzare e selezionare un unico percorso, ovvero quello \textit{ottimo.} \\ In sintesi, il file principale integra i dati di input, richiama i moduli specializzati e gestisce i vincoli globali. \\ Per rendere meglio l'idea, possiamo rappresentare la struttura dell'algoritmo attravverso un diagramma a blocchi, in modo da visualizzare meglio i concetti descritti: 
 
-\item  Costruzione delle finestre: tramite i metodi descritti precedentemente, il file produce per ciascuna stazione le finestre reali e artificiali scartando inoltre finestre artificiali, anche se coerenti, troppo vicine a finestre reali.
+\begin{figure}[H]  % H = Here esatto
+  \centering
+  \caption{Struttura dell'algoritmo sviluppato.}
+  \includegraphics[width=1.3\linewidth]{tesi/DiagrammaABlocchi3.pdf}
+  \label{fig:placeholder}
+\end{figure}
 
-\item Gestione dinamica dei tratti: a seconda delle stazioni iniziali e finali assegnate in input, identifica automaticamente se si tratta di: un percorso in salita o in discesa,un tratto interno su linea sia a binario unico che a doppio binario. In base a questa classificazione dinamica, il main richiama la classe corrispondente e il relativo metodo per trovare il percorso ottimo.
 
-
-\item Ottimizzazione e selezione del percorso: il file riceve dai vari moduli i percorsi parziali e si occupa di verificarne la concatenazione temporale. Nel caso di tratte miste, garantisce che la fine del primo percorso sia coerente con l’inizio del successivo. Ciò viene gestito in particolar modo dal vincolo (\textit{star\_time\_forzato}) che impone in caso la seconda tratta ad iniziare quando finisce la seconda tratta. Permettendo così di unire i percorsi considerati compatibili e validi a tutti gli effetti.  
-\end{itemize}
-In sintesi, il file principale integra i dati di input, richiama i moduli specializzati e gestisce i vincoli globali.
 
 
 \subsection{Interazione tra funzioni e flusso dati}
 Un'altro aspetto centrale dell’implementazione riguarda il modo in cui le funzioni dialogano tra loro e come i dati vengono trasformati lungo l’intero flusso operativo. L’algoritmo, infatti, può essere discritto come una sequenza di moduli che si scambiano continuamente informazioni, ciascuno con un ruolo specifico.
 Per quanto riguarda la logica di passaggio dei dati possiamo dire che ogni fase prende in carico un oggetto, lo modifica/arricchisce e lo consegna alla successiva.
-Per esempio, il dataframe \textit{df}, ottenuto dal parsing del file XML, rappresenta il punto di partenza. Questo oggetto, però, non viene passato direttamente alle classi, ma subisce diverse trasformazioni intermedie. Viene dapprima elaborato per ricavare i tempi medi di percorrenza (\textit{travel\_times}), quindi successivamente integrato con i valori di fragilità (\textit{expected}) e, infine, convertito in un insieme di finestre temporali. \\ Le finestre sono state memorizzate in dizionari separati :  \textit{finestre\_reali\_per\_stazione} e \textit{finestre\_artificiali\_per\_stazione}. \\ Inoltre tutte le operazioni di preparazione delle finestre, in una prima fase iniziale di sviluppo, infatti, si sarebbe potuto pensare di gestirle direttamente all’interno delle singole classi di percorso. Questa scelta però avrebbe comportato diversi rischi:
+Per esempio, il dataframe \textit{df}, ottenuto dal parsing del file XML, rappresenta il punto di partenza. Questo oggetto, però, non viene passato direttamente alle classi, ma subisce diverse trasformazioni intermedie. Viene dapprima elaborato per ricavare i tempi medi di percorrenza (\textit{travel\_times}), quindi successivamente integrato con i valori di fragilità (\textit{expected}) e, infine, convertito in un insieme di finestre temporali. \\ Le finestre sono state memorizzate in dizionari separati :  \textit{finestre\_reali\_per\_stazione} e \\ \textit{finestre\_artificiali\_per\_stazione}. Inoltre tutte le operazioni di preparazione delle finestre, in una prima fase iniziale di sviluppo, infatti, si sarebbe potuto pensare di gestirle direttamente all’interno delle singole classi di percorso. Questa scelta però avrebbe comportato diversi rischi, tra cui: la duplicazione di calcoli e questo perchè le stesse finestre sarebbero state costruite più volte, aumentando i tempi di esecuzione senza aggiungere informazioni nuove. \\ Una possibile incoerenza dei risultati: se ogni classe avesse applicato filtri o criteri propri, le finestre non sarebbero state confrontabili tra tratti diversi. \\ Oltre alla perdita di affidabilità poichè la fragilità calcolata localmente avrebbe potuto divergere rispetto a quella attesa, generando percorsi “ottimali” solo in apparenza. \\ In questo modo, le classi dedicate ai diversi tratti di linea possono interagire con i dati senza dover conoscere come sono stati costruiti. Garantendo che quest'ultime oltre a lavorare sugli stessi dati, evitano incoerenze, duplicazioni e possibili divergenze.
 
-\begin{itemize}
-    \item Duplicazione di calcoli: le stesse finestre sarebbero state costruite più volte, aumentando i tempi di esecuzione senza aggiungere informazioni nuove.
-    
-    \item Incoerenza dei risultati: se ogni classe avesse applicato filtri o criteri propri, le finestre non sarebbero state confrontabili tra tratti diversi.
-   
-    \item Perdita di affidabilità: la fragilità calcolata localmente avrebbe potuto divergere rispetto a quella attesa, generando percorsi “ottimali” solo in apparenza.
-\end{itemize}
-In questo modo, le classi dedicate ai diversi tratti di linea possono interagire con i dati senza dover conoscere come sono stati costruiti. Garantendo che quest'ultime oltre a lavorare sugli stessi dati, evitano incoerenze, duplicazioni e possibili divergenze.
 
+
+\begin{figure}[H]  % H = Here esatto
+  
+  \includegraphics[width=1.2\linewidth]{tesi/DiagrammaClassiGiusto.pdf}
+  \caption{Modulazione delle classi.}
+  \label{fig:placeholder}
+\end{figure}
 
 \section{Modulo di ottimizzazione}
 Il modulo di ottimizzazione non è soltanto un contenitore di vincoli e regole, ma il punto in cui la formalizzazione teorica si traduce in un processo decisionale concreto. Qui l’algoritmo prende in carico le finestre temporali già preparate e prova a costruire un percorso coerente per il nuovo treno. \\ 
-L’idea di fondo è semplice: partendo dalla prima stazione, si esplorano tutte le possibili finestre disponibili e si cercano catene che rispettino i vincoli. La difficoltà sta nel fatto che il numero di combinazioni può crescere rapidamente. Per questo è stata adottata una programmazione dinamica (DP), che consente di valutare progressivamente le scelte, scartando subito le sequenze incoerenti o con un'alta fragilità invece di esplorare tutte le combinazioni possibili rischiando di inceppare in calcoli esplosivi. L’algoritmo rimane semplice e veloce. \\
+L’idea di fondo è semplice: partendo dalla prima stazione, si esplorano tutte le possibili finestre disponibili e si cercano catene che rispettino i vincoli. La difficoltà sta nel fatto che il numero di combinazioni può crescere rapidamente o al contrario, averne poche. Per questo è stata adottata una programmazione dinamica (DP), che consente di valutare progressivamente le scelte, scartando subito le sequenze incoerenti o con un'alta fragilità invece di esplorare tutte le combinazioni possibili rischiando di inceppare in calcoli esplosivi. L’algoritmo rimane semplice e veloce. \\
 Il processo si ripete fino alla stazione finale. In ogni passo, la DP non conserva tutte le sequenze possibili migliori. Alla fine, ciò che rimane è il percorso ottimo richiesto per il treno aggiuntivo.
 
 
@@ -504,23 +456,8 @@ Il processo si ripete fino alla stazione finale. In ogni passo, la DP non conser
 
 Uno degli aspetti più delicati del problema riguarda la gestione della fragilità associata alle finestre temporali. Non basta infatti sapere se una finestra è libera o meno,o se è compatibile o meno: occorre stimare anche quanto sia “rischioso” effettivamente inserire un treno al suo interno. Per fare questo, abbiamo introdotto il concetto di finestre di influenza, che permette di quantificare gli effetti di un inserimento sul resto della rete.
 \subsection{Rappresentazione della fragilità}
-La fragilità è stata rappresentata come un valore numerico associato a ciascuna finestra, ricavato dagli scenari di ritardo primario.
-
-\begin{itemize}
-    \item Nel caso delle finestre reali, il valore è quello calcolato direttamente a partire dall’expected ottenuto dalle simulazioni.
-  
-    \item Per le finestre artificiali, inizialmente create con fragilità nulla, il valore viene ricalcolato considerando l’influenza delle finestre reali vicine.
-
-\end{itemize}
-In questo modo, ogni finestra artificiale, porta con sé un “peso” che misura la sua criticità rispetto alla stabilità dell’orario e questo perchè collocare un treno in questi spazi anche se sono vuoti può comunque influenzare la rete, creando come abbiamo già detto, disagi a cascata.
-Per tenerne conto, abbiamo introdotto un ricalcolo contestuale delle finestre artificiali \textit{(calcola\_fragilita\_contestuale)}:
-
-\begin{enumerate}
-    \item Si guarda alla stazione precedente (influenza “a monte”);
-    \item Si guarda alla stazione successiva (influenza “a valle”);
-    \item Se esistono finestre reali molto vicine, la fragilità delle artificiali viene aumentata proporzionalmente ai valori di fragilità delle reali.
-\end{enumerate}
-In pratica, le finestre artificiali ereditano parte del rischio delle finestre adiacenti, diventando più o meno “sensibili” in base al contesto.
+La fragilità è stata rappresentata come un valore numerico associato a ciascuna finestra, ricavato dagli scenari di ritardo primario. \\ Nel caso delle finestre reali, il valore è quello calcolato direttamente a partire dall’expected ottenuto dalle simulazioni. \\ Per le finestre artificiali, inizialmente create con fragilità nulla, il valore viene ricalcolato considerando l’influenza delle finestre reali vicine. In questo modo, ogni finestra artificiale, porta con sé un “peso” che misura la sua criticità rispetto alla stabilità dell’orario e questo perchè collocare un treno in questi spazi anche se sono vuoti può comunque influenzare la rete, creando come abbiamo già detto, disagi a cascata.
+Per tenerne conto, abbiamo introdotto un ricalcolo contestuale delle finestre artificiali \textit{(calcola\_fragilita\_contestuale)}: si guarda alla stazione precedente (influenza “a monte”); stazione successiva (influenza “a valle”). Se esistono finestre reali molto vicine, la fragilità delle artificiali viene aumentata proporzionalmente ai valori di fragilità delle reali. \\ In pratica, le finestre artificiali ereditano parte del rischio delle finestre adiacenti, diventando più o meno “sensibili” in base al contesto.
 
 \subsection{Calcolo delle penalità}
 Il calcolo della fragilità contestuale avviene tramite due parametri di ponderazione:
@@ -532,6 +469,7 @@ $\gamma$ (gamma) $\rightarrow$ peso delle influenze provenienti dalle stazioni a
 In questo modo, una finestra che inizialmente aveva fragilità zero può assumere un valore maggiore se si trova in un contesto particolarmente critico.
 Se non esistono finestre reali con baricentro entro 7 minuti dalla finestra artificiale, la penalità non viene applicata: la fragilità della finestra resta pari al valore di base e non introduce rischi aggiuntivi. Più una finestra reale è lontana nel tempo, meno la sua fragilità influisce, il contributo diventa nullo: anche una finestra molto fragile (ad esempio con valore >700) non incide se il suo baricentro è troppo distante da quello artificiale.
 Questo significa che non tutte le stazioni affollate trasmettono automaticamente fragilità alle finestre vicine: l’effetto si percepisce solo entro un certo “raggio temporale”. In questo modo si evita di penalizzare intervalli che, pur essendo nella stessa stazione, non avrebbero alcuna interazione diretta con il treno che vogliamo inserire.
+Questa influenza 
 
 \subsection{Classificazione}
 Per dare un significato operativo ai valori numerici di fragilità, abbiamo introdotto una classificazione in cinque livelli: Ottima, Buona, Moderata, Pericolosa, Critica. \\ 
@@ -574,6 +512,20 @@ Abbiamo preso come riferimento inoltre la deviazione standard e le code della di
 \end{table} 
 Questa classificazione non ha soltanto un valore descrittivo, ma costituisce anche un supporto pratico alla lettura dei risultati. L’associazione tra intervalli numerici e categorie qualitative consente infatti di interpretare rapidamente il grado di rischio connesso a ciascuna finestra. Inoltre, la corrispondenza con i colori utilizzati nei grafici (dal verde per le zone sicure al grigio scuro per quelle critiche) facilita l’analisi visiva e rende immediata l’individuazione delle aree problematiche.
 
+
+\subsection{Scelta finale del percorso ottimo}
+Dopo aver effettuato un'attenta analisi a livello di fragilità, assegnando quindi i corrispondenti valori di fragilità alle varie finestre, sia reali che artificiali. Otteniamo quelle che sono tutte le informazioni necessarie che evidenziano le aree critiche e non. L'algoritmo è in grado a questo punto di scegliere il percorso ottimo tramite la funzione \textit{trova\_percorso\_ottimo()} fra i possibili percorsi generati e proposti dalla funzione \textit{compatibili()}. Ha dunque l'obiettivo di scegliere il percorso che minimizzare al massimo la funzione obiettivo, nient'altro che la nostra fragilità totale,ricavata dalla somma delle singole finestre artificiali che appartengono alla concatenazione. \\
+(Per comodità rappresenteremo solamente le finestre artificiali, e al posto delle finestre reali utilizzeremo i treni reali presenti nel timetable).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.2\linewidth]{tesi/PercorsiProposti3.pdf}
+    \caption{Percorsi proposti dalla funzione compatibili(),con annessi valori di fragilità.}
+    \label{fig:placeholder}
+\end{figure}
+
+Come possiamo notare dalla figura, la nostra funzione calcola\_fragilità\_contestuale() ha ricalcolato i valori delle finestre artificiali considerando l'influenza delle finestre reali nelle vicinanze, assegnando a se stessa il corrispondente valore.
+A questo punto l'algoritmo sceglie il percorso ottimo, dando il output : 
+
 % ------------------------
 % Capitolo 4
 % ------------------------
@@ -591,6 +543,14 @@ Questa classificazione non ha soltanto un valore descrittivo, ma costituisce anc
 \section{Vantaggi dell’approccio}
 \section{Limiti e difficoltà}
 \section{Sviluppi futuri}
+
+%Bibliografia
+
+
+\printbibliography
+
+
+
 
 % ------------------------
 % Fine documento
