@@ -2,7 +2,7 @@
 
 Python-based constraint optimisation system developed as part of my Bachelor’s thesis in Computer Engineering (Automation Systems).
 
-The objective of this project is to insert an additional train into an existing real-world railway timetable without modifying the original schedule structure or disrupting operational stability.
+The objective of this project was to insert an additional train into an existing real-world railway timetable without modifying the original schedule structure or disrupting operational stability.
 
 ---
 
@@ -16,15 +16,16 @@ The objective of this project is to insert an additional train into an existing 
 
 ## Problem Context
 
-Railway timetables involve multiple operational constraints, including:
+The railway network included:
 
-- Bidirectional train flows
-- Single-track sections
+- Trains operating in both directions (up and down flows)
+- Single-track sections shared by opposite flows
+- Block Points used to regulate train separation and safety constraints
 - Fixed station sequences
-- Real operational data
-- Temporal overlap conflicts
+- Real operational timetable data
+- Time overlap and resource conflicts
 
-The challenge was to determine whether a new train could be inserted into the system while fully respecting these constraints.
+The main challenge was to determine whether a new train could be inserted without interfering with existing services, particularly across shared single-track segments and regulated block sections.
 
 ---
 
@@ -32,13 +33,13 @@ The challenge was to determine whether a new train could be inserted into the sy
 
 The solution:
 
-- Models a fixed railway network
+- Models a fixed railway network with bidirectional flows
 - Processes real timetable datasets (XML & JSON)
 - Evaluates feasible insertion paths using dynamic programming
-- Detects scheduling conflicts and constraint violations
-- Ensures non-interference with existing services
+- Detects conflicts across single-track and block-regulated sections
+- Ensures full non-interference with existing scheduled trains
 
-The system required extensive debugging and structured logical modelling to maintain consistency across all operational constraints.
+The system required extensive debugging, structured logical modelling and careful constraint validation to maintain overall schedule consistency.
 
 ---
 
