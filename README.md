@@ -1,59 +1,47 @@
 # Railway Timetable Optimisation System
 
-This repository contains a Python-based optimisation system developed as part of my Bachelor's thesis in Computer Engineering (Automation Systems).
+Python-based constraint optimisation system developed as part of my Bachelor’s thesis in Computer Engineering (Automation Systems).
 
-The purpose of the project is to insert an additional train into an existing railway timetable without affecting the stability, timing, or structure of the original schedule.
+The objective of this project is to insert an additional train into an existing real-world railway timetable without modifying the original schedule structure or disrupting operational stability.
 
-## Technologies Used
+---
 
-- **Python**  
-- **Pandas** for data manipulation  
-- Dynamic programming for constraint-based optimisation  
+## Technologies
 
-## Problem Overview
+- Python
+- Pandas (data manipulation & time-based analysis)
+- Dynamic Programming (constraint-based optimisation)
 
-Railway timetables involve complex constraints such as:
+---
 
-- bidirectional flows
-- single-track sections
-- real operational data
-- time overlap conflicts
+## Problem Context
 
-The goal of this project was to build a system that optimises train insertion while fully respecting these constraints.
+Railway timetables involve multiple operational constraints, including:
 
-## Key Functionalities
+- Bidirectional train flows
+- Single-track sections
+- Fixed station sequences
+- Real operational data
+- Temporal overlap conflicts
 
-- models a fixed network of stations
-- processes real timetable data
-- evaluates feasible insertion paths
-- detects and resolves conflicts
-- ensures no disruption to existing services
+The challenge was to determine whether a new train could be inserted into the system while fully respecting these constraints.
 
-## Approach
+---
 
-The system uses dynamic programming to evaluate the possible ways a new train can be inserted into the timetable. 
-It handles edge cases and constraint conflicts by:
+## System Logic
 
-- structured logic
-- systematic debugging
-- real data-driven evaluation
+The solution:
+
+- Models a fixed railway network
+- Processes real timetable datasets (XML & JSON)
+- Evaluates feasible insertion paths using dynamic programming
+- Detects scheduling conflicts and constraint violations
+- Ensures non-interference with existing services
+
+The system required extensive debugging and structured logical modelling to maintain consistency across all operational constraints.
+
+---
 
 ## Documentation
 
-Documentation and detailed explanation of the project logic are included in the thesis file.
-
-## How to Use
-
-1. Clone the repository  
-2. Open the Python script  
-3. Review the data input formats  
-4. Run the script on test data  
-
----
-
-## About Me
-
-Computer Engineering graduate with a strong interest in system reliability, edge-case behaviour and logical consistency.
-
----
-
+A complete technical explanation of the modelling approach, optimisation logic and dataset structure is included in the thesis document within this repository.
